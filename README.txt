@@ -1,0 +1,1 @@
+Starting the main project for the course. This here so faris all about http requests and responses, reading data, etc.
