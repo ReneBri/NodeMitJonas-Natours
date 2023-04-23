@@ -6,6 +6,32 @@ const fs = require('fs');
 // JSON.parse converts a json file into an array of JS objects.
 let tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
+exports.checkId = (req, res, next, value) => {
+    if(+value > tours.length){
+        return res.status(404).json({
+            status: 'fail',
+            message: 'could not find resource'
+        });
+    };
+    next();
+};
+
+exports.checkBody = (req, res, next) => {
+    const { body } = req;
+    if (!body.name || body.name.length < 1){
+        return res.status(400).json({
+            status: 'fail',
+            message: 'Please provide a details for the name field.'
+        });
+    } else if (!body.price || body.price.length < 1){
+        return res.status(400).json({
+            status: 'fail',
+            message: 'Please provide a details for the price field.'
+        });
+    }
+    next();
+};
+
 exports.getAllTours = (req, res) => {
     // this is the JSend standard of sending a response.
     // the results part however, is not part of that standard.
@@ -24,7 +50,7 @@ exports.createTour = (req, res) => {
     }
     tours.push(newTour);
     // we use status code 201 because we created something new on the server.
-    fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
+    fs.writeFile(`${__dirname}/../dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
         if(err) return console.log(err.message);
         res.status(201).json({
             status: 'success',
