@@ -4,26 +4,30 @@ const fs = require('fs');
 
 // we do this outside of the main get request for some reason
 // JSON.parse converts a json file into an array of JS objects.
-let tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
+const tours = JSON.parse(
+    fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
+);
 
 exports.checkId = (req, res, next, value) => {
-    if(+value > tours.length){
+    if (+value > tours.length) {
         return res.status(404).json({
             status: 'fail',
             message: 'could not find resource'
         });
-    };
+    }
     next();
 };
 
 exports.checkBody = (req, res, next) => {
     const { body } = req;
-    if (!body.name || body.name.length < 1){
+    if (!body.name || body.name.length < 1) {
         return res.status(400).json({
             status: 'fail',
             message: 'Please provide a details for the name field.'
         });
-    } else if (!body.price || body.price.length < 1){
+    }
+
+    if (!body.price || body.price.length < 1) {
         return res.status(400).json({
             status: 'fail',
             message: 'Please provide a details for the price field.'
@@ -47,31 +51,36 @@ exports.createTour = (req, res) => {
     const newTour = {
         id: newId,
         ...req.body
-    }
+    };
+
     tours.push(newTour);
     // we use status code 201 because we created something new on the server.
-    fs.writeFile(`${__dirname}/../dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
-        if(err) return console.log(err.message);
-        res.status(201).json({
-            status: 'success',
-            data: {
-                tour: newTour
-            }
-        });
-    });
+    fs.writeFile(
+        `${__dirname}/../dev-data/data/tours-simple.json`,
+        JSON.stringify(tours),
+        err => {
+            if (err) return console.log(err.message);
+            res.status(201).json({
+                status: 'success',
+                data: {
+                    tour: newTour
+                }
+            });
+        }
+    );
 };
 
 exports.getTour = (req, res) => {
     const id = +req.params.id;
     const tour = tours.find(tour => tour.id === id);
-    if(tour){
+    if (tour) {
         res.status(200).json({
             status: 'success',
             data: {
                 tour
             }
         });
-    }else{
+    } else {
         res.status(404).json({
             status: 'failed',
             message: 'Sorry, this doesnt exist.'

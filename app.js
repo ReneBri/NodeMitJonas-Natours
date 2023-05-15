@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(express.static(`${__dirname}/public`));
 
 // doing this Express knows that we are defining a middleware here.
-// using app.use() makes it apply to each and every single request. That is because we didn'y supply any route.
+// using app.use() makes it apply to each and every single request. That is because we didn't supply any route.
 // kind of like if we did app.get+post+patch+delete('*', () => {})
 app.use((req, res, next) => {
     // console.log('Hello from the middleware')
