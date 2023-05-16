@@ -1,3 +1,4 @@
+// const { findByIdAndDelete } = require('./../models/tourModel');
 const Tour = require('./../models/tourModel');
 
 // tour route functions/controllers
@@ -51,7 +52,9 @@ exports.getTour = async (req, res) => {
         if (foundTour) {
             res.status(200).json({
                 status: 'success',
-                data: foundTour
+                data: {
+                    tour: foundTour
+                }
             });
         } else {
             throw new Error('No data found');
@@ -62,33 +65,44 @@ exports.getTour = async (req, res) => {
             message: err.message
         });
     }
-
-    // const tour = tours.find(tour => tour.id === id);
-    // if (tour) {
-    //     r
-    // } else {
-    //     res.status(404).json({
-    //         status: 'failed',
-    //         message: 'Sorry, this doesnt exist.'
-    //     });
-    // }
 };
 
-exports.updateTour = (req, res) => {
-    const id = +req.params.id;
-    res.status(200).json({
-        message: 'success',
-        data: {
-            tour: 'this is the updated tour'
-        }
-    });
+exports.updateTour = async (req, res) => {
+    const { id } = req.params;
+    const query = { _id: id };
+    const update = req.body;
+    try {
+        const updatedTour = await Tour.findOneAndUpdate(query, update, {
+            new: true,
+            runValidators: true
+        });
+        res.status(200).json({
+            status: 'success',
+            data: {
+                tour: updatedTour
+            }
+        });
+    } catch (err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err.message
+        });
+    }
 };
 
-exports.deleteTour = (req, res) => {
-    const id = +req.params.id;
-    // 204 is the normal delete status code
-    res.status(204).json({
-        message: 'success',
-        data: null
-    });
+exports.deleteTour = async (req, res) => {
+    const { id } = req.params;
+    try {
+        await Tour.findByIdAndDelete(id);
+        // 204 is the normal delete status code
+        res.status(204).json({
+            status: 'success',
+            data: null
+        });
+    } catch (err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err.message
+        });
+    }
 };
