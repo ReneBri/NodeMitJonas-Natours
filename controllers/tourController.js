@@ -28,8 +28,36 @@ exports.getAllTours = async (req, res) => {
         // but here we are just assigning it the value, rather than executing it.
         let query = Tour.find(newQueryObj);
 
+        // SORTING
+        if (req.query.sort) {
+            const sortBy = req.query.sort.split(',').join(' ');
+            query = query.sort(sortBy);
+        } else {
+            query = query.sort('difficulty');
+        }
+
+        // PROJECTING
         if (req.query.fields) {
-            query = query.sort();
+            const fields = req.query.fields.split(',').join(' ');
+            query = query.select(fields);
+        } else {
+            query = query.select('-__v -_id');
+        }
+
+        // PAGINATION
+        // this || here is apparently a way of setting a default value?
+        const page = req.query.page * 1 || 1;
+        const limit = req.query.limit * 1 || 100;
+        const skip = (page - 1) * limit;
+
+        query = query.skip(skip).limit(limit);
+
+        if (req.query.page) {
+            const numOfTours = await Tour.countDocuments(newQueryObj);
+            console.log(numOfTours);
+            if (skip >= numOfTours) {
+                throw new Error('Page does not exist');
+            }
         }
 
         // Instead we await here
